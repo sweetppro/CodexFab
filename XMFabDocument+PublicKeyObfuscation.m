@@ -52,7 +52,9 @@
 	
 	// Define some Cocoa-code-wrapper strings for substitution
 	NSString *openmsg = @"NSMutableString *pkb64 = [NSMutableString string];\n";
+    NSString *swiftHeader;
 	NSString *closeMsg = @"NSString *publicKey = [NSString stringWithString:pkb64];\n";
+    NSString *swiftFooter;
 	NSString *pkb64FragOpen = @"[pkb64 appendString:@\"";
 	NSString *pkb64FragClose =  @"\"];\n";
     
@@ -66,6 +68,8 @@
     if (obfuscatorIndex == 1)
     {
         openmsg = @"let pkb64:NSMutableString = NSMutableString()\n";
+        swiftHeader = @"pkb64.append(\"-----BEGIN PUBLIC KEY-----\\n\")\n";
+        swiftFooter = @"pkb64.append(\"-----END PUBLIC KEY-----\\n\")\n";
         closeMsg = @"let publicKey = pkb64 as String";
         pkb64FragOpen = @"pkb64.append(\"";
         pkb64FragClose =  @"\")\n";
@@ -119,6 +123,8 @@
 		firstIndex += tlength;
 	}
 
+    if (swiftHeader != nil)
+        return [NSString stringWithFormat:@"%@%@%@%@%@",openmsg,swiftHeader,pkb64Fragmented,swiftFooter,closeMsg];
 	return [NSString stringWithFormat:@"%@%@%@",openmsg,pkb64Fragmented,closeMsg];
 
 }
