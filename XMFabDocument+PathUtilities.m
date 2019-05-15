@@ -26,7 +26,7 @@
 	
 	if (![fileManager fileExistsAtPath:path isDirectory:NULL])
 	{		
-		if(![fileManager createDirectoryAtPath:path attributes:nil]) {
+		if(![fileManager createDirectoryAtPath:path withIntermediateDirectories:NO attributes:nil error:nil]) {
 			
 			NSLog(@"Error! Could not create directory");
 		}

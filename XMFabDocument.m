@@ -18,7 +18,6 @@
 #import "CFobLicGenerator.h"
 #import "XMArgumentKeys.h"
 #import "XMDSAKeyGenerator.h"
-#import "NSData+Base64Extensions.h"
 
 
 @interface XMFabDocument (Private) 
@@ -218,29 +217,20 @@
 	if (!privKey || !regName)
 		return nil;
 	
-	CFobLicGenerator *generator = [CFobLicGenerator generatorWithPrivateKey:privKey];
-	generator.regName = regName;
+    CFobLicGenerator *generator = [[CFobLicGenerator alloc] init];
+    [generator setPrivateKey:privKey error:nil];
+    NSString * regCode = [generator generateRegCodeForName:regName error:nil];
 	
 	NSLog(@"generator %@ %@", regName, privKey);
 	
-	if (![generator generate]) {
-		
-		return nil;		
-	}
-	
-	return generator.regCode;
+    return regCode;
 }
 
 - (BOOL) verifyRegCode:(NSString *)regCode forName:(NSString *)regName publicKey:(NSString *)pubKey {
 	
-	CFobLicVerifier *verifier = [CFobLicVerifier verifierWithPublicKey:pubKey];
-	verifier.regName = regName;
-	verifier.regCode = regCode;
-	
-	if ([verifier verify])
-		return YES;
-	
-	return NO;	
+    CFobLicVerifier *verifier = [[CFobLicVerifier alloc] init];
+    [verifier setPublicKey:pubKey error:nil];
+    return [verifier verifyRegCode:regCode forName:regName error:nil];
 }
 
 
@@ -354,7 +344,7 @@
 - (void) generateLicenseURL {
 	
 	NSData * name = [[self userName] dataUsingEncoding:NSUTF8StringEncoding];
-	NSString * nameB64 = [name encodeBase64];
+    NSString * nameB64 = [[NSString alloc] initWithData:name encoding:NSUTF8StringEncoding];
 	NSString * scheme = [[self product] valueForKey:@"licenseURLScheme"];
 	NSString * licenseCode = self.code;
 	

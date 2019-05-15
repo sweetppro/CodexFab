@@ -16,7 +16,6 @@
 #import "XMDSAKeyGenerator.h"
 #import "NSString+PECrypt.h"
 #import "NSData+PECrypt.h"
-#import "NSString-Base64Extensions.h"
 #import "XMArgumentKeys.h"
 
 
@@ -110,7 +109,7 @@
 	
 	[self opensslTaskWithArguments:arguments];
 	
-	return [NSString stringWithContentsOfFile:outFilePath];
+	return [NSString stringWithContentsOfFile:outFilePath encoding:NSUTF8StringEncoding error:nil];
 }
 
 
@@ -132,7 +131,7 @@
 	
 	[self opensslTaskWithArguments:arguments];
 	
-	return [NSString stringWithContentsOfFile:outFilePath];
+	return [NSString stringWithContentsOfFile:outFilePath encoding:NSUTF8StringEncoding error:nil];
 }
 
 
@@ -155,7 +154,7 @@
 						   nil ];
 	
 	[self opensslTaskWithArguments:arguments];	
-	return [NSString stringWithContentsOfFile:outFilePath];
+	return [NSString stringWithContentsOfFile:outFilePath encoding:NSUTF8StringEncoding error:nil];
 }
 
 @end

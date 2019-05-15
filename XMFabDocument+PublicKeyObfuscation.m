@@ -22,7 +22,9 @@
 - (IBAction) showObfusactorPanel:(id)sender {
 	
 	[self generateObfuscatedCode:self];
-	[NSApp beginSheet:obfuscatorPanel modalForWindow:[self windowForSheet] modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:nil];	
+    [self.windowForSheet beginSheet:obfuscatorPanel completionHandler:^(NSModalResponse returnCode) {
+        [self closeObfusactorPanel:self];
+    }];
 }
 
 - (IBAction) closeObfusactorPanel:(id)sender {
@@ -31,17 +33,16 @@
 	[NSApp endSheet:obfuscatorPanel];
 }
 
-- (void) sheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	
-	[self closeObfusactorPanel:self];
+- (IBAction) codeTypeChanged:(id)sender
+{
+    [self generateObfuscatedCode:nil];
 }
-
 
 - (void)generateObfuscatedCode:(id)sender {
 	
 	NSString *pubKey = [[self pem] valueForKey:@"publicKey"];
 	if(pubKey)
-		self.obfuscatedPublicKey = [self obfuscatedCocoaCodeForPublicKey:pubKey];
+        self.obfuscatedPublicKey = [self obfuscatedCocoaCodeForPublicKey:pubKey];
 }
 
 - (NSString *)obfuscatedCocoaCodeForPublicKey:(NSString*)publicKeyString {
@@ -54,6 +55,22 @@
 	NSString *closeMsg = @"NSString *publicKey = [NSString stringWithString:pkb64];\n";
 	NSString *pkb64FragOpen = @"[pkb64 appendString:@\"";
 	NSString *pkb64FragClose =  @"\"];\n";
+    
+    
+    //swift or objC?
+    NSInteger obfuscatorIndex = 0;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"codeType"] != nil)
+        obfuscatorIndex = [defaults integerForKey:@"codeType"];
+    
+    if (obfuscatorIndex == 1)
+    {
+        openmsg = @"let pkb64:NSMutableString = NSMutableString()\n";
+        closeMsg = @"let publicKey = pkb64 as String";
+        pkb64FragOpen = @"pkb64.append(\"";
+        pkb64FragClose =  @"\"];\n";
+    }
+    
 	
 	//Container for the Cocoa code-as-text
 	NSMutableString *pkb64Fragmented = [NSMutableString string];
@@ -63,7 +80,7 @@
 
 	//remove first & last lines
 	NSArray *lines = [publicKeyString componentsSeparatedByString:@"\n"];
-	int i, cnt = [lines count];
+	int i, cnt = (int)[lines count];
 	for (i=1; i < cnt -2; i++) {
 		[tempKey appendString:[NSString stringWithFormat:@"%@\n",[lines objectAtIndex:i]]];
 	}
@@ -74,14 +91,14 @@
 								options:NSLiteralSearch 
 								  range:NSMakeRange(0, [tempKey length])];
 	
-	int length = [tempKey length];
+	int length = (int)[tempKey length];
 	
 	// define min & max substring lengths - these could be exposed in the gui
 	int maxStringLength =  (length/8);
 	int minStringLength =  3;
 	
 	// init rand() 
-	srand(time(NULL));
+	srand((int)time(NULL));
 	
 	// break up the string into random length chunks
 	int firstIndex = 0;
