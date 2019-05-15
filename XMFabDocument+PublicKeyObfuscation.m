@@ -68,7 +68,7 @@
         openmsg = @"let pkb64:NSMutableString = NSMutableString()\n";
         closeMsg = @"let publicKey = pkb64 as String";
         pkb64FragOpen = @"pkb64.append(\"";
-        pkb64FragClose =  @"\"];\n";
+        pkb64FragClose =  @"\")\n";
     }
     
 	
